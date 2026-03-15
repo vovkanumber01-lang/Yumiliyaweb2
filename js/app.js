@@ -21,7 +21,7 @@ async function init() {
   // Check auth — redirect to /login if not authenticated
   try {
     const res = await fetch(`${API}/api/me`, { credentials: 'include' });
-    if (res.status === 401) { window.location.href = '/login'; return; }
+    window.location.href = 'https://yumiliyaweb2.rkstudio.workers.dev/login';
   } catch (e) {
     toast('Ошибка подключения к серверу', true);
     return;
