@@ -47,7 +47,7 @@ async function loadAll() {
 async function fetchMedia(type) {
   try {
     const res  = await fetch(`${API}/api/list/${type}`, { credentials: 'include' });
-    if (res.status === 401) { window.location.href = '/login'; return; }
+    window.location.href = 'https://yumiliyaweb2.rkstudio.workers.dev/login';
     const data = await res.json();
     mediaCache[type] = data.files || [];
     renderGallery(type);
@@ -66,7 +66,7 @@ async function uploadFiles(type, files) {
     body: fd,
     credentials: 'include'
   });
-  if (res.status === 401) { window.location.href = '/login'; return { files: [] }; }
+  window.location.href = 'https://yumiliyaweb2.rkstudio.workers.dev/login'; { files: [] }; }
   const data = await res.json();
   if (!data.ok) throw new Error(data.error);
   return data;
@@ -77,7 +77,7 @@ async function deleteFileAPI(type, filename) {
     method: 'DELETE',
     credentials: 'include'
   });
-  if (res.status === 401) { window.location.href = '/login'; return; }
+ window.location.href = 'https://yumiliyaweb2.rkstudio.workers.dev/login'; }
   const data = await res.json();
   if (!data.ok) throw new Error(data.error);
 }
