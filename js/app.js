@@ -12,7 +12,7 @@ let lightboxIndex = 0;
 // In production this will be on the same origin (Pages + Worker routes)
 // so we use relative paths. If testing worker separately, set this:
 // const API = 'https://yumiliya-worker.YOUR-SUBDOMAIN.workers.dev';
-const API = 'https://yumiliya-worker.rkstudio.workers.dev';
+const API = 'https://yumiliyaweb2.rkstudio.workers.dev';
 
 // =========================================
 // INIT
