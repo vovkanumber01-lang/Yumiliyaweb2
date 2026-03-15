@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Юмилия — Галерея Контента</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cormorant+SC:wght@300;400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div class="bg-layer">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- ===== GALLERY VIEW ===== -->
+  <div class="view active" id="view-gallery">
+
+    <header class="site-header">
+      <div class="header-rule"></div>
+      <h1 class="site-title">Ю&thinsp;м&thinsp;и&thinsp;л&thinsp;и&thinsp;я</h1>
+      <div class="header-rule"></div>
+    </header>
+
+    <p class="site-subtitle">Г А Л Е Р Е Я&ensp;К О Н Т Е Н Т А&ensp;·&ensp;И З Б Р А Н Н О Е</p>
+
+    <div class="header-divider">
+      <span class="divider-line"></span>
+      <span class="divider-ornament">✦</span>
+      <span class="divider-line"></span>
+    </div>
+
+    <div class="tab-pill-wrap">
+      <div class="tab-pill">
+        <div class="pill-indicator" id="pill-indicator"></div>
+        <button class="pill-btn active" data-media="photos">Ф О Т О</button>
+        <button class="pill-btn" data-media="gifs">G I F</button>
+        <button class="pill-btn" data-media="videos">В И Д Е О</button>
+      </div>
+    </div>
+
+    <div class="gallery-body">
+      <div class="media-panel active" id="panel-photos">
+        <div class="grid" id="grid-photos">
+          <div class="empty-state">
+            <div class="sakura">🌸</div>
+            <p>Фотографии появятся здесь</p>
+          </div>
+        </div>
+      </div>
+      <div class="media-panel" id="panel-gifs">
+        <div class="grid" id="grid-gifs">
+          <div class="empty-state">
+            <div class="sakura">🌸</div>
+            <p>GIF появятся здесь</p>
+          </div>
+        </div>
+      </div>
+      <div class="media-panel" id="panel-videos">
+        <div class="grid grid-wide" id="grid-videos">
+          <div class="empty-state">
+            <div class="sakura">🌸</div>
+            <p>Видео появятся здесь</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-nav">
+      <button class="footer-link" id="go-admin">
+        <span class="footer-link-line"></span>
+        А Д М И Н И С Т Р А Ц И Я
+        <span class="footer-link-line"></span>
+      </button>
+      <div class="footer-stats">
+        <span id="stat-photos">0</span>&ensp;фото&ensp;·&ensp;<span id="stat-gifs">0</span>&ensp;gif&ensp;·&ensp;<span id="stat-videos">0</span>&ensp;видео
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== ADMIN VIEW ===== -->
+  <div class="view" id="view-admin">
+
+    <header class="site-header">
+      <div class="header-rule"></div>
+      <h1 class="site-title">А&thinsp;д&thinsp;м&thinsp;и&thinsp;н</h1>
+      <div class="header-rule"></div>
+    </header>
+
+    <p class="site-subtitle">У П Р А В Л Е Н И Е&ensp;Г А Л Е Р Е Е Й</p>
+
+    <div class="header-divider">
+      <span class="divider-line"></span>
+      <span class="divider-ornament">✦</span>
+      <span class="divider-line"></span>
+    </div>
+
+    <div class="upload-row">
+
+      <div class="upload-card">
+        <div class="upload-card-label">Ф О Т О</div>
+        <div class="upload-formats">JPG · PNG · WEBP · AVIF</div>
+        <div class="dropzone" id="dz-photos" data-type="photos">
+          <div class="dz-inner">
+            <div class="dz-sakura">🌸</div>
+            <p class="dz-text">Перетащите или нажмите</p>
+          </div>
+          <input type="file" class="file-input" accept="image/jpeg,image/png,image/webp,image/avif" multiple />
+        </div>
+        <div class="upload-queue" id="queue-photos"></div>
+      </div>
+
+      <div class="upload-card">
+        <div class="upload-card-label">G I F</div>
+        <div class="upload-formats">GIF · APNG · WEBP</div>
+        <div class="dropzone" id="dz-gifs" data-type="gifs">
+          <div class="dz-inner">
+            <div class="dz-sakura">🌸</div>
+            <p class="dz-text">Перетащите или нажмите</p>
+          </div>
+          <input type="file" class="file-input" accept="image/gif,image/apng,image/webp" multiple />
+        </div>
+        <div class="upload-queue" id="queue-gifs"></div>
+      </div>
+
+      <div class="upload-card">
+        <div class="upload-card-label">В И Д Е О</div>
+        <div class="upload-formats">MP4 · WEBM · OGV · MOV</div>
+        <div class="dropzone" id="dz-videos" data-type="videos">
+          <div class="dz-inner">
+            <div class="dz-sakura">🌸</div>
+            <p class="dz-text">Перетащите или нажмите</p>
+          </div>
+          <input type="file" class="file-input" accept="video/mp4,video/webm,video/ogg,video/quicktime" multiple />
+        </div>
+        <div class="upload-queue" id="queue-videos"></div>
+      </div>
+
+    </div>
+
+    <div class="manage-wrap">
+      <div class="manage-header">
+        <span class="divider-line short"></span>
+        <span class="manage-title">У П Р А В Л Е Н И Е</span>
+        <span class="divider-line short"></span>
+      </div>
+
+      <div class="manage-tab-row">
+        <button class="manage-pill active" data-manage="photos">Фото <span class="badge" id="badge-photos">0</span></button>
+        <button class="manage-pill" data-manage="gifs">GIF <span class="badge" id="badge-gifs">0</span></button>
+        <button class="manage-pill" data-manage="videos">Видео <span class="badge" id="badge-videos">0</span></button>
+      </div>
+
+      <div class="manage-list" id="manage-photos"></div>
+      <div class="manage-list hidden" id="manage-gifs"></div>
+      <div class="manage-list hidden" id="manage-videos"></div>
+    </div>
+
+    <div class="footer-nav">
+      <button class="footer-link" id="go-gallery">
+        <span class="footer-link-line"></span>
+        Г А Л Е Р Е Я
+        <span class="footer-link-line"></span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox">
+    <div class="lb-backdrop" id="lb-backdrop"></div>
+    <button class="lb-close" id="lb-close">✕</button>
+    <button class="lb-prev" id="lb-prev">‹</button>
+    <button class="lb-next" id="lb-next">›</button>
+    <div class="lb-content" id="lb-content"></div>
+    <div class="lb-caption" id="lb-caption"></div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
