@@ -8,25 +8,17 @@ let mediaCache = { photos: [], gifs: [], videos: [] };
 let lightboxItems = [];
 let lightboxIndex = 0;
 
-// ── Worker URL ────────────────────────────────────────────
-// In production this will be on the same origin (Pages + Worker routes)
-// so we use relative paths. If testing worker separately, set this:
-// const API = 'https://yumiliya-worker.YOUR-SUBDOMAIN.workers.dev';
 const API = 'https://yumiliyaweb2.rkstudio.workers.dev';
+const LOGIN_URL = 'https://yumiliyaweb2.rkstudio.workers.dev/login';
 
-// =========================================
-// INIT
-// =========================================
 async function init() {
-  // Check auth — redirect to /login if not authenticated
   try {
     const res = await fetch(`${API}/api/me`, { credentials: 'include' });
-    window.location.href = 'https://yumiliyaweb2.rkstudio.workers.dev/login';
+    if (res.status === 401) { window.location.href = LOGIN_URL; return; }
   } catch (e) {
     toast('Ошибка подключения к серверу', true);
     return;
   }
-
   await loadAll();
   setupViews();
   setupPillTabs();
@@ -41,13 +33,10 @@ async function loadAll() {
   updateStats();
 }
 
-// =========================================
-// API CALLS
-// =========================================
 async function fetchMedia(type) {
   try {
     const res  = await fetch(`${API}/api/list/${type}`, { credentials: 'include' });
-    window.location.href = 'https://yumiliyaweb2.rkstudio.workers.dev/login';
+    if (res.status === 401) { window.location.href = LOGIN_URL; return; }
     const data = await res.json();
     mediaCache[type] = data.files || [];
     renderGallery(type);
@@ -61,30 +50,20 @@ async function fetchMedia(type) {
 async function uploadFiles(type, files) {
   const fd = new FormData();
   files.forEach(f => fd.append('file', f));
-  const res  = await fetch(`${API}/api/upload/${type}`, {
-    method: 'POST',
-    body: fd,
-    credentials: 'include'
-  });
-  window.location.href = 'https://yumiliyaweb2.rkstudio.workers.dev/login'; { files: [] }; }
+  const res = await fetch(`${API}/api/upload/${type}`, { method: 'POST', body: fd, credentials: 'include' });
+  if (res.status === 401) { window.location.href = LOGIN_URL; return { files: [] }; }
   const data = await res.json();
   if (!data.ok) throw new Error(data.error);
   return data;
 }
 
 async function deleteFileAPI(type, filename) {
-  const res = await fetch(`${API}/api/delete/${type}/${encodeURIComponent(filename)}`, {
-    method: 'DELETE',
-    credentials: 'include'
-  });
- window.location.href = 'https://yumiliyaweb2.rkstudio.workers.dev/login'; }
+  const res = await fetch(`${API}/api/delete/${type}/${encodeURIComponent(filename)}`, { method: 'DELETE', credentials: 'include' });
+  if (res.status === 401) { window.location.href = LOGIN_URL; return; }
   const data = await res.json();
   if (!data.ok) throw new Error(data.error);
 }
 
-// =========================================
-// VIEW SWITCHING
-// =========================================
 function setupViews() {
   document.getElementById('go-admin').addEventListener('click', () => switchView('admin'));
   document.getElementById('go-gallery').addEventListener('click', () => switchView('gallery'));
@@ -97,37 +76,28 @@ function switchView(name) {
   if (name === 'gallery') loadAll();
 }
 
-// =========================================
-// LOGOUT
-// =========================================
 function setupLogout() {
   const btn = document.getElementById('logout-btn');
   if (!btn) return;
   btn.addEventListener('click', async () => {
     await fetch(`${API}/logout`, { method: 'POST', credentials: 'include' });
-    window.location.href = '/login';
+    window.location.href = LOGIN_URL;
   });
 }
 
-// =========================================
-// PILL TABS
-// =========================================
 function setupPillTabs() {
   const btns = document.querySelectorAll('.pill-btn');
   const indicator = document.getElementById('pill-indicator');
-
   function updateIndicator(btn) {
     const pillRect = btn.closest('.tab-pill').getBoundingClientRect();
     const btnRect  = btn.getBoundingClientRect();
     indicator.style.width = btnRect.width + 'px';
     indicator.style.left  = (btnRect.left - pillRect.left) + 'px';
   }
-
   requestAnimationFrame(() => {
     const active = document.querySelector('.pill-btn.active');
     if (active) updateIndicator(active);
   });
-
   btns.forEach(btn => {
     btn.addEventListener('click', () => {
       const media = btn.dataset.media;
@@ -140,22 +110,14 @@ function setupPillTabs() {
   });
 }
 
-// =========================================
-// RENDER GALLERY
-// =========================================
 function renderGallery(type) {
   const items  = mediaCache[type];
   const grid   = document.getElementById('grid-' + type);
   const labels = { photos: 'Ф О Т О Г Р А Ф И И', gifs: 'G I F', videos: 'В И Д Е О' };
-
   if (!items.length) {
-    grid.innerHTML = `<div class="empty-state">
-      <div class="sakura">🌸</div>
-      <p>${labels[type]}&ensp;П О Я В Я Т С Я&ensp;З Д Е С Ь</p>
-    </div>`;
+    grid.innerHTML = `<div class="empty-state"><div class="sakura">🌸</div><p>${labels[type]}&ensp;П О Я В Я Т С Я&ensp;З Д Е С Ь</p></div>`;
     return;
   }
-
   if (type === 'videos') {
     grid.innerHTML = items.map((item, i) => `
       <div class="grid-item-video" data-index="${i}" data-type="videos">
@@ -170,50 +132,29 @@ function renderGallery(type) {
         <div class="item-label">${esc(item.name)}</div>
       </div>`).join('');
   }
-
   grid.querySelectorAll('[data-index]').forEach(el => {
     el.addEventListener('click', () => openLightbox(type, +el.dataset.index));
   });
 }
 
-// =========================================
-// RENDER MANAGE
-// =========================================
 function renderManage(type) {
   const items = mediaCache[type];
   const list  = document.getElementById('manage-' + type);
   const badge = document.getElementById('badge-' + type);
   badge.textContent = items.length;
-
-  if (!items.length) {
-    list.innerHTML = `<div class="empty-manage">Нет загруженных файлов</div>`;
-    return;
-  }
-
+  if (!items.length) { list.innerHTML = `<div class="empty-manage">Нет загруженных файлов</div>`; return; }
   const isVidType = type === 'videos';
   list.innerHTML = items.map(item => {
     const thumb = isVidType
       ? `<video class="manage-thumb" src="${API}${item.url}" preload="metadata" muted></video>`
       : `<img class="manage-thumb" src="${API}${item.url}" alt="${esc(item.name)}" />`;
-    return `
-      <div class="manage-item">
-        ${thumb}
-        <div class="manage-info">
-          <div class="manage-name">${esc(item.name)}</div>
-          <div class="manage-meta">${formatBytes(item.size)} · ${item.date}</div>
-        </div>
-        <button class="delete-btn" data-name="${esc(item.name)}" data-type="${type}" title="Удалить">✕</button>
-      </div>`;
+    return `<div class="manage-item">${thumb}<div class="manage-info"><div class="manage-name">${esc(item.name)}</div><div class="manage-meta">${formatBytes(item.size)} · ${item.date}</div></div><button class="delete-btn" data-name="${esc(item.name)}" data-type="${type}" title="Удалить">✕</button></div>`;
   }).join('');
-
   list.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', () => deleteItem(btn.dataset.type, btn.dataset.name));
   });
 }
 
-// =========================================
-// MANAGE TABS
-// =========================================
 function setupManageTabs() {
   document.querySelectorAll('.manage-pill').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -226,24 +167,18 @@ function setupManageTabs() {
   });
 }
 
-// =========================================
-// DROPZONES
-// =========================================
 function setupDropzones() {
   STORES.forEach(type => {
     const dz    = document.getElementById('dz-' + type);
     const input = dz.querySelector('.file-input');
     const queue = document.getElementById('queue-' + type);
-
     dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
     dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
     dz.addEventListener('drop', async e => {
-      e.preventDefault();
-      dz.classList.remove('dragover');
+      e.preventDefault(); dz.classList.remove('dragover');
       const files = Array.from(e.dataTransfer.files).filter(f => validFile(f, type));
       files.length ? await handleFiles(files, type, queue) : toast('Неверный тип файла', true);
     });
-
     input.addEventListener('change', async () => {
       const files = Array.from(input.files);
       if (files.length) await handleFiles(files, type, queue);
@@ -276,40 +211,27 @@ async function handleFiles(files, type, queueEl) {
 
 function addQueueItem(queueEl, file) {
   const isVid = file.type.startsWith('video');
-  const el    = document.createElement('div');
+  const el = document.createElement('div');
   el.className = 'queue-item';
-
   if (isVid) {
-    el.innerHTML = `
-      <div class="q-thumb-placeholder">▶</div>
-      <span class="q-name">${esc(file.name)}</span>
-      <span class="q-size">${formatBytes(file.size)}</span>
-      <span class="q-dot"></span>`;
+    el.innerHTML = `<div class="q-thumb-placeholder">▶</div><span class="q-name">${esc(file.name)}</span><span class="q-size">${formatBytes(file.size)}</span><span class="q-dot"></span>`;
     queueEl.prepend(el);
   } else {
     const reader = new FileReader();
     reader.onload = e => {
-      el.innerHTML = `
-        <img class="q-thumb" src="${e.target.result}" />
-        <span class="q-name">${esc(file.name)}</span>
-        <span class="q-size">${formatBytes(file.size)}</span>
-        <span class="q-dot"></span>`;
+      el.innerHTML = `<img class="q-thumb" src="${e.target.result}" /><span class="q-name">${esc(file.name)}</span><span class="q-size">${formatBytes(file.size)}</span><span class="q-dot"></span>`;
     };
     reader.readAsDataURL(file);
     queueEl.prepend(el);
   }
-
   setTimeout(() => {
     el.style.transition = 'opacity 0.4s, transform 0.4s';
-    el.style.opacity    = '0';
-    el.style.transform  = 'translateX(-8px)';
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(-8px)';
     setTimeout(() => el.remove(), 400);
   }, 4000);
 }
 
-// =========================================
-// DELETE
-// =========================================
 async function deleteItem(type, filename) {
   try {
     await deleteFileAPI(type, filename);
@@ -322,9 +244,6 @@ async function deleteItem(type, filename) {
   }
 }
 
-// =========================================
-// LIGHTBOX
-// =========================================
 function setupLightbox() {
   const lb = document.getElementById('lightbox');
   document.getElementById('lb-close').addEventListener('click', closeLightbox);
@@ -333,8 +252,8 @@ function setupLightbox() {
   document.getElementById('lb-next').addEventListener('click', () => navLb(1));
   document.addEventListener('keydown', e => {
     if (!lb.classList.contains('open')) return;
-    if (e.key === 'Escape')     closeLightbox();
-    if (e.key === 'ArrowLeft')  navLb(-1);
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') navLb(-1);
     if (e.key === 'ArrowRight') navLb(1);
   });
 }
@@ -367,18 +286,12 @@ function showLbItem() {
   caption.textContent = `${item.name} · ${lightboxIndex + 1} / ${lightboxItems.length}`;
 }
 
-// =========================================
-// STATS
-// =========================================
 function updateStats() {
   document.getElementById('stat-photos').textContent = mediaCache.photos.length;
   document.getElementById('stat-gifs').textContent   = mediaCache.gifs.length;
   document.getElementById('stat-videos').textContent = mediaCache.videos.length;
 }
 
-// =========================================
-// TOAST
-// =========================================
 function toast(msg, isErr = false) {
   const wrap = document.getElementById('toast-wrap');
   const el   = document.createElement('div');
@@ -387,26 +300,20 @@ function toast(msg, isErr = false) {
   wrap.appendChild(el);
   setTimeout(() => {
     el.style.transition = 'opacity 0.3s, transform 0.3s';
-    el.style.opacity    = '0';
-    el.style.transform  = 'translateX(12px)';
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(12px)';
     setTimeout(() => el.remove(), 300);
   }, 2800);
 }
 
-// =========================================
-// UTILS
-// =========================================
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function formatBytes(b) {
-  if (b < 1024)      return b + ' B';
-  if (b < 1048576)   return (b/1024).toFixed(1) + ' KB';
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
   return (b/1048576).toFixed(1) + ' MB';
 }
 
-// =========================================
-// START
-// =========================================
 init().catch(console.error);
