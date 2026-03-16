@@ -8,8 +8,8 @@ let mediaCache = { photos: [], gifs: [], videos: [] };
 let lightboxItems = [];
 let lightboxIndex = 0;
 
-const API = 'https://yumiliyaweb2.rkstudio.workers.dev';
-const LOGIN_URL = 'https://yumiliyaweb2.rkstudio.workers.dev/login';
+const API = 'https://yumiliya-worker.rkstudio.workers.dev';
+const LOGIN_URL = 'https://yumiliya-worker.rkstudio.workers.dev/login';
 
 async function init() {
   try {
